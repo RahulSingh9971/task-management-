@@ -1,4 +1,8 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+let rawApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+if (rawApiBase.endsWith('/')) {
+  rawApiBase = rawApiBase.slice(0, -1);
+}
+export const API_BASE = rawApiBase;
 export const BACKEND_URL = API_BASE.endsWith('/api') ? API_BASE.slice(0, -4) : API_BASE;
 
 async function apiFetch(path: string, options: RequestInit = {}) {
