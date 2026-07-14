@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { api } from '../../utils/api';
 import {
   User,
   Shield,
@@ -11,7 +12,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Save,
-  Loader2
+  Loader2,
+  Camera
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -24,6 +26,9 @@ export default function ProfilePage() {
   const [experience, setExperience] = useState('');
   const [availability, setAvailability] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -34,6 +39,41 @@ export default function ProfilePage() {
       setAvailability(user.availability);
     }
   }, [user]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('Please upload an image file (PNG/JPG/etc.)', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const result = await api.files.upload(formData);
+      const fullUrl = `http://localhost:5000${result.filepath}`;
+      
+      setPhoto(fullUrl);
+      addToast('Image uploaded successfully! Click save to apply changes.', 'success');
+    } catch (err: any) {
+      addToast(err.message || 'Failed to upload image', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhoto('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,17 +113,60 @@ export default function ProfilePage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Avatar Preview */}
           <div className="flex items-center gap-4 border-b border-card-border pb-5">
-            <img
-              src={photo || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120'}
-              alt={name}
-              className="h-16 w-16 rounded-full object-cover border border-slate-350 dark:border-slate-700"
-            />
+            <div className="relative group h-16 w-16 rounded-full overflow-hidden border border-slate-350 dark:border-slate-700 cursor-pointer shrink-0">
+              <img
+                src={photo || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120'}
+                alt={name}
+                className="h-full w-full object-cover"
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition duration-200"
+              >
+                {uploading ? (
+                  <Loader2 size={16} className="animate-spin text-white" />
+                ) : (
+                  <>
+                    <Camera size={14} />
+                    <span className="text-[8px] font-bold mt-1 uppercase tracking-wider">Change</span>
+                  </>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+              />
+            </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">{name || 'Workspace Account'}</h3>
               <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-1 uppercase font-semibold tracking-wider">
                 <Shield size={12} className="text-indigo-500" />
                 <span>{user?.role} Permissions level</span>
               </p>
+              <div className="flex gap-3 mt-2 select-none">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-[10px] font-bold text-indigo-500 hover:text-indigo-400 transition"
+                  disabled={uploading}
+                >
+                  {uploading ? 'Uploading...' : 'Upload Photo'}
+                </button>
+                {photo && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="text-[10px] font-bold text-red-500 hover:text-red-400 transition"
+                    disabled={uploading}
+                  >
+                    Remove Photo
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
