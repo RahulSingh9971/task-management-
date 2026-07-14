@@ -8,6 +8,13 @@ export const BACKEND_URL = API_BASE.endsWith('/api') ? API_BASE.slice(0, -4) : A
 async function apiFetch(path: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
+  // Check if this is a protected endpoint
+  const isAuthEndpoint = path.startsWith('/auth/login') || path.startsWith('/auth/register') || path.startsWith('/auth/google');
+  if (!isAuthEndpoint && !token) {
+    // Return a pending promise that never resolves to prevent state updates/toasts during auth redirect
+    return new Promise<any>(() => {});
+  }
+
   const headers = new Headers(options.headers || {});
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
@@ -24,6 +31,17 @@ async function apiFetch(path: string, options: RequestInit = {}) {
   });
 
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login';
+        }
+      }
+      // Return a pending promise to prevent the calling component from catching the error and displaying error toasts
+      return new Promise<any>(() => {});
+    }
+
     let errMsg = 'API Error';
     try {
       const errData = await res.json();
