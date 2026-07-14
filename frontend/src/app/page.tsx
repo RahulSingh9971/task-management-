@@ -84,10 +84,11 @@ export default function DashboardPage() {
       setReportData(repData);
 
       // Extract general timeline of activities from projects
-      const activityRes = await fetch('http://localhost:5000/api/projects/1'); // Fetch project 1 detailed timeline
-      if (activityRes.ok) {
-        const details = await activityRes.json();
+      try {
+        const details = await api.projects.getById(1);
         setTimeline(details.timeline || []);
+      } catch (err) {
+        console.error('Failed to fetch project 1 timeline:', err);
       }
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);

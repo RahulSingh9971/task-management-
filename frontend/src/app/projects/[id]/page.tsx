@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, use } from 'react';
-import { api } from '@/utils/api';
+import { api, BACKEND_URL } from '@/utils/api';
 import { useNotifications } from '@/context/NotificationContext';
 import {
   FolderKanban,
@@ -631,7 +631,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
 
                     <div className="flex items-center gap-1 shrink-0">
                       <a
-                        href={`http://localhost:5000${f.filepath}`}
+                        href={`${BACKEND_URL}${f.filepath}`}
                         target="_blank"
                         rel="noreferrer"
                         className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition"

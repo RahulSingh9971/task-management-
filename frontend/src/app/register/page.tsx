@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { Loader2 } from 'lucide-react';
-import Link from 'next/navigation';
+import { api } from '@/utils/api';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -25,15 +25,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role })
-      });
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error);
-
+      const data = await api.auth.register({ name, email, password, role });
       localStorage.setItem('token', data.token);
       window.location.href = '/'; // Reload to boot AuthContext
       addToast('Registration Successful!', 'success');

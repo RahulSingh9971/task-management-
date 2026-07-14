@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
-import { api } from '../../utils/api';
+import { api, BACKEND_URL } from '../../utils/api';
 import {
   User,
   Shield,
@@ -61,7 +61,7 @@ export default function ProfilePage() {
       formData.append('file', file);
 
       const result = await api.files.upload(formData);
-      const fullUrl = `http://localhost:5000${result.filepath}`;
+      const fullUrl = `${BACKEND_URL}${result.filepath}`;
       
       setPhoto(fullUrl);
       addToast('Image uploaded successfully! Click save to apply changes.', 'success');

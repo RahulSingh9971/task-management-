@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/utils/api';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -58,15 +59,8 @@ export default function LoginPage() {
         googleId: 'google_123456789'
       };
 
-      const res = await fetch('http://localhost:5000/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(googleMock)
-      });
-      const data = await res.json();
+      const data = await api.auth.googleLogin(googleMock);
       
-      if (!res.ok) throw new Error(data.error);
-
       localStorage.setItem('token', data.token);
       window.location.href = '/'; // Reload to boot AuthContext
       addToast('Mock Google Login Successful!', 'success');
