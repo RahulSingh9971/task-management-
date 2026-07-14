@@ -16,7 +16,8 @@ import {
   Loader2,
   Trash2,
   Edit,
-  Activity
+  Activity,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 
