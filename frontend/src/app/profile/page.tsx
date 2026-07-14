@@ -13,7 +13,8 @@ import {
   AlertCircle,
   Save,
   Loader2,
-  Camera
+  Camera,
+  Upload
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -184,13 +185,28 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Avatar Photo URL</label>
-              <input
-                type="text"
-                value={photo}
-                onChange={e => setPhoto(e.target.value)}
-                placeholder="https://images.unsplash.com/photo..."
-                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-transparent rounded-lg text-xs outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 text-foreground transition"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={photo}
+                  onChange={e => setPhoto(e.target.value)}
+                  placeholder="https://images.unsplash.com/photo..."
+                  className="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-transparent rounded-lg text-xs outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 text-foreground transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition whitespace-nowrap flex items-center gap-1.5 shadow-sm"
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Upload size={12} />
+                  )}
+                  <span>{uploading ? 'Uploading...' : 'Upload'}</span>
+                </button>
+              </div>
             </div>
           </div>
 
