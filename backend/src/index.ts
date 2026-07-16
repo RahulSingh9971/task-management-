@@ -23,6 +23,27 @@ app.use(express.urlencoded({ extended: true }));
 const uploadsPath = path.resolve(__dirname, '../../uploads');
 app.use('/uploads', express.static(uploadsPath));
 
+// Lazy database connection & syncing for serverless environment
+let isDbSynced = false;
+const ensureDbConnected = async () => {
+  if (!isDbSynced) {
+    await sequelize.authenticate();
+    await sequelize.sync();
+    isDbSynced = true;
+    console.log('✅ Database connected and synced.');
+  }
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbConnected();
+    next();
+  } catch (error) {
+    console.error('❌ Database connection/sync failed:', error);
+    res.status(500).json({ error: 'Database connection/sync failed' });
+  }
+});
+
 // API routes
 app.use('/api', apiRouter);
 
@@ -31,23 +52,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date() });
 });
 
-// Database Sync & Server Launch
-const startServer = async () => {
-  try {
-    // Synchronize DB models (creates tables if they do not exist)
-    await sequelize.authenticate();
-    console.log('✅ Connection to the database has been established successfully.');
-    
-    await sequelize.sync();
-    console.log('✅ All database models synchronized.');
+// Run server only if not in Vercel serverless environment
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Express API server running on http://localhost:${PORT}`);
+  });
+}
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Express API server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('❌ Unable to connect/start backend server:', error);
-    process.exit(1);
-  }
-};
-
-startServer();
+export default app;
