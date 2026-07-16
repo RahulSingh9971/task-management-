@@ -15,9 +15,16 @@ if (dbUri) {
   sequelize = new Sequelize(dbUri, {
     dialect: dialect,
     logging: false,
+    pool: {
+      max: 2, // Keep pool small for serverless environment
+      min: 0,
+      acquire: 5000, // Fail fast (5s) to avoid Vercel 10s execution timeout
+      idle: 5000
+    },
     dialectOptions: isSqlite ? {} : {
       // Support secure connection if using services like Neon/Supabase/RDS/etc.
-      ssl: (isPostgres || process.env.DB_SSL === 'true') ? { rejectUnauthorized: false } : false
+      ssl: (isPostgres || process.env.DB_SSL === 'true') ? { rejectUnauthorized: false } : false,
+      connectTimeout: 5000 // Connect timeout (5s) for Postgres
     }
   });
 } else {
