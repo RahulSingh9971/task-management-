@@ -31,9 +31,14 @@ const ensureDbConnected = async () => {
   }
   if (!isDbSynced) {
     await sequelize.authenticate();
-    await sequelize.sync();
+    // Avoid running sync() on Vercel to prevent concurrent DB lockups and serverless timeouts
+    if (!process.env.VERCEL) {
+      await sequelize.sync();
+      console.log('✅ Database connected and synced.');
+    } else {
+      console.log('✅ Database authenticated.');
+    }
     isDbSynced = true;
-    console.log('✅ Database connected and synced.');
   }
 };
 
