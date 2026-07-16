@@ -21,13 +21,21 @@ if (dbUri) {
     }
   });
 } else {
-  // Use local SQLite database file
-  const storagePath = path.resolve(__dirname, '../../database.sqlite');
-  sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: storagePath,
-    logging: false,
-  });
+  if (process.env.VERCEL) {
+    // On Vercel, if connection string is missing, use a dummy Postgres instance to avoid loading sqlite3 (which crashes)
+    sequelize = new Sequelize('postgres://localhost/dummy', {
+      dialect: 'postgres',
+      logging: false,
+    });
+  } else {
+    // Use local SQLite database file
+    const storagePath = path.resolve(__dirname, '../../database.sqlite');
+    sequelize = new Sequelize({
+      dialect: 'sqlite',
+      storage: storagePath,
+      logging: false,
+    });
+  }
 }
 
 export default sequelize;
