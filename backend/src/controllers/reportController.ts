@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Op } from 'sequelize';
 import { Task, Project, User, Client } from '../models';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import sequelize from '../db/config';
@@ -27,7 +28,7 @@ export const getProductivityData = async (req: AuthenticatedRequest, res: Respon
       ],
       include: [{ model: User, as: 'assignedUser', attributes: ['name', 'role'] }],
       group: ['assignedUserId', 'assignedUser.id', 'assignedUser.name', 'assignedUser.role'],
-      where: { assignedUserId: { [sequelize.Sequelize.Op.ne]: null } }
+      where: { assignedUserId: { [Op.ne]: null } }
     });
 
     // 4. Monthly Productivity Graph Data (Mocked from actual dates if available)

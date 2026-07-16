@@ -247,6 +247,10 @@ export class Task extends Model {
   public labels!: string | null; // JSON string array
   public checklist!: string | null; // JSON string of {text: string, completed: boolean}[]
   public projectId!: number;
+
+  // Associations
+  public project?: Project;
+  public assignedUser?: User;
 }
 
 Task.init(
