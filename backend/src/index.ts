@@ -26,6 +26,9 @@ app.use('/uploads', express.static(uploadsPath));
 // Lazy database connection & syncing for serverless environment
 let isDbSynced = false;
 const ensureDbConnected = async () => {
+  if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && process.env.VERCEL) {
+    throw new Error('DATABASE_URL or POSTGRES_URL environment variable is missing on Vercel.');
+  }
   if (!isDbSynced) {
     await sequelize.authenticate();
     await sequelize.sync();

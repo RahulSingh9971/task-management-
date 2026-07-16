@@ -21,9 +21,6 @@ if (dbUri) {
     }
   });
 } else {
-  if (process.env.VERCEL) {
-    throw new Error('❌ DATABASE_URL or POSTGRES_URL environment variable is missing on Vercel.');
-  }
   // Use local SQLite database file
   const storagePath = path.resolve(__dirname, '../../database.sqlite');
   sequelize = new Sequelize({
